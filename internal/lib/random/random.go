@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-//TODO write tests
-
 func NewRandomString(size int) string {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 

@@ -50,7 +50,6 @@ func main() {
 	router.Route("/url", func(r chi.Router) {
 		r.Use(middleware.BasicAuth("shortener", map[string]string{
 			cfg.HTTPServer.User: cfg.HTTPServer.Password,
-			//cfg.HTTPServer.User, cfg.HTTPServer.Password, TODO: more adminlike users
 		}))
 		r.Post("/", save.New(log, storage))
 		router.Delete("/{alias}", delete2.New(log, storage))
