@@ -1,6 +1,7 @@
 package delete
 
 import (
+	"context"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -17,7 +18,7 @@ type Response struct {
 }
 
 type URLRemover interface {
-	DeleteURL(alias string) error
+	DeleteURL(ctx context.Context, alias string) error
 }
 
 func New(log *slog.Logger, urlRemover URLRemover) http.HandlerFunc {
@@ -38,7 +39,24 @@ func New(log *slog.Logger, urlRemover URLRemover) http.HandlerFunc {
 			return
 		}
 
-		err := urlRemover.DeleteURL(alias)
+		ctx := r.Context()
+		isAdmin := ctx.Value("isAdmin")
+		if isAdmin == nil {
+			log.Info("user is not an admin")
+			w.WriteHeader(http.StatusForbidden)
+			render.JSON(w, r, resp.Error("forbidden"))
+
+			return
+		}
+		if !isAdmin.(bool) {
+			log.Info("user is not an admin")
+			w.WriteHeader(http.StatusForbidden)
+			render.JSON(w, r, resp.Error("forbidden"))
+
+			return
+		}
+
+		err := urlRemover.DeleteURL(r.Context(), alias)
 		if errors.Is(err, storage.ErrURLNotFound) {
 			log.Info("alias doesn't exists", slog.String("url", alias))
 

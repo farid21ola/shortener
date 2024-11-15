@@ -1,9 +1,17 @@
 env: "local"
 
-storage_path: "./storage/storage.db"
+connection_string: "postgres://postgres:admin@localhost:5432/url-shortener?sslmode=disable"
 http_server:
   address: "localhost:8082"
   timeout: 4s
   idle_timeout: 60s
   user: "myuser"
   password: "mypass"
+
+clients:
+  sso:
+    address: "localhost:44044"
+    timeout: 4s
+    retries_count: 3
+
+app_secret: "top_secret"
