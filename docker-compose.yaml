@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  shortener:
+    build: ./
+    command: ["dockerize", "-wait", "tcp://db:5432", "-timeout", "60s", "./url-shortener"]
+    restart: on-failure
+    environment:
+      DATABASE_URL : postgres://postgres:admin@db:5432/shortener?sslmode=disable
+      CONFIG_PATH : ./config/prod.yaml
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+      - migrate
+    networks:
+      - shortener_network
+
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      - POSTGRES_DB=shortener
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432"
+    networks:
+      - shortener_network
+
+  migrate:
+    image: migrate/migrate
+    restart: on-failure
+    command: [
+      "-path", "/migrations",
+      "-database", "postgres://postgres:admin@db:5432/shortener?sslmode=disable",
+      "up"
+    ]
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - db
+    networks:
+      - shortener_network
+
+networks:
+  shortener_network:

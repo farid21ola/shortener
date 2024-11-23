@@ -1,5 +1,6 @@
 env: "prod"
-connection_string: "postgres://postgres:admin@localhost:5432/url-shortener?sslmode=disable"
+
+connection_string: "postgres://postgres:admin@db:5432/shortener?sslmode=disable"
 http_server:
   address: "0.0.0.0:8082"
   timeout: 4s
